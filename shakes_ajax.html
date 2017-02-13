@@ -1,0 +1,181 @@
+<HTML>
+<HEAD>
+<TITLE>Shakespeare It Up</TITLE>
+<META AUTHOR="Jim Skon">
+</HEAD>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <!-- $Id: name_stats_ajax.html,v 1.6 skon Exp $ -->
+<link rel="stylesheet" type="text/css" href="shakes_ajax.css">
+  <title>GNU cgicc Name Data Form</title>
+  
+  
+  <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<script type = "text/javascript">
+var XMLHttp;
+if(navigator.appName == "Microsoft Internet Explorer") {
+    XMLHttp = new ActiveXObject("Microsoft.XMLHTTP");
+} 
+else {
+    XMLHttp = new XMLHttpRequest();
+}
+
+
+			
+// return the value of the radio button that is checked
+// return an empty string if none are checked, or
+// there are no radio buttons
+function getCheckedValue(radioObj) {
+  if(!radioObj)
+     return "";
+  var radioLength = radioObj.length;
+  if(radioLength == undefined)
+     if(radioObj.checked)
+        return radioObj.value;
+     else
+        return "";
+  for(var i = 0; i < radioLength; i++) {
+     if(radioObj[i].checked) {
+        return radioObj[i].value;
+     }
+   }
+    return "";
+}
+function getresponse () {
+
+   //var ts = getCheckedValue(document.radioResultsSelect.type_select);
+
+     var name = document.getElementById('Verona').value;		     
+     if (name.length < 1) return;
+
+    XMLHttp.open("GET", "olivierid_shakes.cgi?"
+						 //+ "&name=" + name
+						 ,true);
+    XMLHttp.onreadystatechange=function() {
+    var table = XMLHttp.responseText;
+    document.getElementById('response_area').innerHTML = table;;
+	}
+	XMLHttp.send(null);
+}
+
+</script>
+
+<STYLE>
+
+BODY {background: #FFFFFF}
+A:link {color: #80FF00}
+A:visited {color: #FF00FF}
+H1 {font-size: 24pt; font-family: arial}
+H2 {font-size: 18pt; font-family: braggadocio}
+H3 {font size:14pt; font-family: desdemona}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+img 
+{
+align: center;
+}
+
+#top
+{
+background-image: "http://www.liveforfilms.com/wp-content/uploads/2015/09/macbeth.jpg";
+}
+
+</STYLE>
+
+<BODY>
+
+<div id = "top" class = "jumbotron">
+
+<p>
+Who's there? I am
+
+</p>
+
+</div>
+
+<img src= "https://s-media-cache-ak0.pinimg.com/236x/89/f9/65/89f9654d90309203f1734dd2e90e8e80.jpg">
+
+<H1>Shakespeare</H1>
+<P>
+When, in disgrace with fortune and men’s eyes,
+I all alone beweep my outcast state,
+And trouble deaf heaven with my bootless cries,
+And look upon myself and curse my fate,
+Wishing me like to one more rich in hope,
+Featured like him, like him with friends possessed,
+Desiring this man’s art and that man’s scope,
+With what I most enjoy contented least;
+Yet in these thoughts myself almost despising,
+Haply I think on thee, and then my state,
+(Like to the lark at break of day arising
+From sullen earth) sings hymns at heaven’s gate;
+       For thy sweet love remembered such wealth brings
+       That then I scorn to change my state with kings.
+<P>  The reason for such a architecture is to allow a simple program, with a MAP preloaded with data,
+to quickly provide results without incurring the overhead of a reloading the census data for each request. 
+<br> (Written by Daniel Olivieri)
+
+
+
+<P>
+Select which type of search you would like to perform:
+<form name="radioResultsSelect">
+<!-- <TABLE>
+<TR>
+<TD ALIGN=RIGHT VALIGN=TOP><INPUT NAME="type_select" TYPE="radio" VALUE="Last" checked id=last></TD>
+<TD ALIGN=LEFT VALIGN=TOP>Last Names</TD></input>
+
+<TD ALIGN=RIGHT VALIGN=TOP><INPUT NAME="type_select" TYPE="radio" VALUE="Male"  id=male></TD>
+<TD ALIGN=LEFT VALIGN=TOP>Male First Names</TD></input>
+
+<TD ALIGN=RIGHT VALIGN=TOP><INPUT NAME="type_select" TYPE="radio" VALUE="Female"  id=female></TD>
+<TD ALIGN=LEFT VALIGN=TOP>Female First Names</TD></input>
+
+</TR>
+</TABLE> -->
+
+<HR>
+
+Last name to look up data for: 
+<INPUT NAME="name" TYPE="text" id="Verona" MAXLENGTH=30></TD>
+
+<p>
+<input type="button" onclick="javascript: getresponse ()" name="submit" value="Submit" />
+</p>
+
+
+<div id = "response_area">
+</div>
+
+
+</BODY>
+</HTML>
+
+
+
+
+
