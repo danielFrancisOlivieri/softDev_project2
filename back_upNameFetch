@@ -1,0 +1,227 @@
+#include <iostream>
+// Stuff for AJAX
+#include "cgicc/Cgicc.h"
+#include "cgicc/HTTPHTMLHeader.h"
+#include "cgicc/HTMLClasses.h"
+
+//Stuff for pipes
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include "fifo.h"
+using namespace std;
+using namespace cgicc; // Needed for AJAX functions.
+
+// Possible values returned by results_select
+#define WORD
+
+vector <string> linesToPresentVector;
+
+//myString needs to be a copy of the original string
+std::string StringToUpper(std::string myString)
+{
+  const int length = myString.length();
+  for(int i=0; i!=length ; ++i)
+    {
+      myString[i] = std::toupper(myString[i]);
+    }
+  return myString;
+}
+
+// Take a string of words and make a HTML table line.
+
+string receive_fifo = "Wordreply";
+string send_fifo = "Wordrequest";
+
+
+int main() {
+  Cgicc cgi;    // Ajax object
+  char *cstr;
+  string results, message, word, reply;
+ 
+ 
+   while (1) {
+	cout << "Enter a new word:";
+	cin >>  word;
+	transform(word.begin(), word.end(), word.begin(), ::toupper);
+
+	
+	// create the FIFOs for communication
+	Fifo recfifo(receive_fifo);
+	Fifo sendfifo(send_fifo);
+
+	message = "$WORD*" + word;
+	cout << "Send:" << message << endl;
+	sendfifo.openwrite();
+	sendfifo.send(message);
+
+	/* Get a message from a server */
+	
+	recfifo.openread();
+	  cout << "Content-Type: text/plain\n\n";
+	do {
+		
+			reply = recfifo.recv();
+	linesToPresentVector.push_back(reply);
+	cout << "working: " << reply << endl;
+	}
+		while (reply != "$END");
+
+	
+		
+	recfifo.fifoclose();
+	sendfifo.fifoclose();
+	/*
+	for (int i; i < linesToPresentVector.size() - 1; i++)
+	{
+	cout << "Server sent: " << linesToPresentVector[i] << endl;	
+	}
+	*/
+  }
+ 
+ 
+ // create the FIFOs for communication
+  //Fifo recfifo(receive_fifo);
+  //Fifo sendfifo(send_fifo);
+ 
+ /*
+  string reply;
+  vector <string> linesToPresentVector;
+int count = 0;
+  while (1) {
+	//form_iterator name = cgi.getElement("name");
+	//word = **name;
+	cin >> word;
+	//word = "hell";
+	transform(word.begin(), word.end(), word.begin(), ::toupper);
+
+		if (word.size() > 2)
+		{
+			// create the FIFOs for communication
+	Fifo recfifo(receive_fifo);
+	Fifo sendfifo(send_fifo);
+
+	message = "$WORD*" + word;
+	cout << "Send: " << message << endl;
+	sendfifo.openwrite();
+	sendfifo.send(message);
+
+	
+	
+	recfifo.openread();
+	
+	
+	count++;
+	if (count> 10)
+		{
+			cout << "count: " << count << endl;
+			count = 0;
+			break;
+		}
+		
+	do {
+		
+		
+			reply = recfifo.recv();
+	//linesToPresentVector.push_back(reply);
+	cout << "working: " << reply << endl;
+	}
+		while (reply.find("$END") != string::npos);
+
+	
+		
+	recfifo.fifoclose();
+	sendfifo.fifoclose();
+
+			
+		}
+	
+	
+  }
+*/
+ 
+ //***************************************************
+ //***************************************************
+ 
+ /*
+  // Create AJAX objects to recieve information from web page.
+
+  //form_iterator word = cgi.getElement("word");
+  string stname = "";
+ while (1)//(stname.size() > 2)
+ {
+	 form_iterator name = cgi.getElement("name");
+
+ 
+  // // Call server to get results
+   stname = **name;
+   
+	  while (results != "$END")
+ {
+	
+
+   cout << "stname: " << stname << endl;
+ message = stname;
+  sendfifo.openwrite();
+  sendfifo.send("girth");
+  
+   recfifo.openread();
+   results = recfifo.recv();
+  recfifo.fifoclose();
+  sendfifo.fifoclose();
+  
+     cout << "Content-Type: text/plain\n\n";
+  
+  cout << results;	
+	 
+ }
+ }
+
+   */
+  
+  
+  
+  
+  // sendfifo.openwrite();
+  // sendfifo.send(message);
+  
+   // recfifo.openread();
+   // results = recfifo.recv();
+  // recfifo.fifoclose();
+  // sendfifo.fifoclose();
+  
+     // cout << "Content-Type: text/plain\n\n";
+  
+  // cout << "|*|" << results;
+  
+  
+  
+  /* Get a message from a server */
+  
+  //recfifo.openread();
+ 
+ // while (1)
+ // {
+	  // cout << "girth" << endl;
+   // results = recfifo.recv();
+   // // cout << results;
+   // linesToPresentVector.push_back(results);
+   // if (results == "$END")
+   // {
+	   // break;
+   // }
+ // }
+ 
+ 
+
+cout << "FINISHED" << endl;
+  
+return 0;
+}
