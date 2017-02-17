@@ -1,13 +1,7 @@
 
 
 /***************************************************************************
- * shakespeare.cpp  -  Program for shakespeare nerds
- *
- * copyright : (C) 2017 by Daniel Olivieri
- *
- * This program finds the lines that words in shakespeare appear on and puts the searched for word in bold 
- *   It also displays the book that the word was found in 
- * 
+WOOOOOOOW This is Daniel making his change to the code to pracite git
  *
  ***************************************************************************/
  
