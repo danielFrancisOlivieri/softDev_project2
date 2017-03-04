@@ -1,11 +1,12 @@
-
-
 /***************************************************************************
-WOOOOOOOW This is Daniel making his change to the code to pracite git
+ * shakespeare.cpp  -  Program for shakespeare nerds
  *
- Hi Daniel-- this is Juvi! 
- 
- Hey this is Aidan
+ * copyright : (C) 2017 by Daniel Olivieri
+ *
+ * This program finds the lines that words in shakespeare appear on and puts the searched for word in bold 
+ *   It also displays the book that the word was found in 
+ * 
+ *
  ***************************************************************************/
  
  
@@ -33,6 +34,10 @@ WOOOOOOOW This is Daniel making his change to the code to pracite git
  
 using namespace std;
 
+/* Fifo names */
+string receive_fifo = "Wordrequest";
+string send_fifo = "Wordreply";
+
 // class that allows the vectors to hold both the line number and the name of the play the line is in 
 class textLineNumbers {
    
@@ -41,9 +46,6 @@ class textLineNumbers {
 	string title, lineString;
 };
 
-/* Fifo names */
-string receive_fifo = "Wordrequest";
-string send_fifo = "Wordreply";
 
 // variables for exporting the stuff to other programs
 string inMessage, outMessage, lineToExport;
@@ -62,8 +64,10 @@ vector <textLineNumbers> indexSearch(string word) {
     /* First use find, so as to NOT create a new entry */
     it = curMap.find(word);
     if (it == curMap.end()) {
+		
          return(blank);
     } else {
+		
         return (curMap[word]);
     }
 }
@@ -79,12 +83,28 @@ void runLoop (ifstream & is);
 // postcon: feeds textLineNumbers objects into the map of vectors
 void putIntoMap (map<string, vector<textLineNumbers> > &curMap, ifstream &is);
 
-// vector 
+string returnLine (int pos)
+{
+	string path = "/home/class/SoftDev/Shakespeare/"; // holds first part of file path 
+	string aLine;
+		// sets file
+	string filename = path + "Shakespeare.txt";  
+	ifstream is(filename.c_str());
+		is.seekg(pos, is.beg);
+		getline(is, aLine);
+		return aLine;
+}
+
+// vectors
 vector <textLineNumbers> vec;
 vector <string> lineVector;
 
+// start of int main 
 int main() {
 
+	   // create the FIFOs for communication
+  Fifo recfifo(receive_fifo);
+  Fifo sendfifo(send_fifo);
 		
 	 stemming::english_stem<char, std::char_traits<char> > StemEnglish; // allows for stemming 
 
@@ -94,113 +114,72 @@ int main() {
 	string filename = path + "Shakespeare.txt";  
 	
 	
- string line; // variable to use for inputting individual lines 
+ string aLine; // variable to use for inputting individual lines 
 
 	  
 	  	// sets is as an ifstream for the shakespeare file 
 	ifstream is(filename.c_str());
 	  putIntoMap(curMap, is); // this feeds all lines into the map for easy access later
 	  
-	   // create the FIFOs for communication
-  Fifo recfifo(receive_fifo);
-  Fifo sendfifo(send_fifo);
-  
+  	filename = path + "Shakespeare.txt"; 
+
+
+// main while loop 
    while (1) {
-
-    /* Get a message from a client */
-    recfifo.openread();
-    inMessage = recfifo.recv();
-	cout << "inMessage: " << inMessage << endl;
-	/* Parse the incoming message */
-	/* Form:  $word  */
-
-/*
-	// back up 5 places
-	for (int i=0 ; i<5 && (it!=curMap.begin()); i++) {
-	  it--;
-	}
-*/
-		// sets file
-	string filename = path + "Shakespeare.txt"; 
-	//ifstream is(filename.c_str());
-	
-	//cout << "Hail to your grace and welcome to the world of Shakespeare!" << endl << endl;
-	// cout << "This program will help you find every instance of a word in all of Shakespeare's work. " << endl << endl;
-	is.open(filename.c_str());
-	
-	inMessage.erase(0,6);
+cout << "test 1" << endl;
+	    recfifo.openread();// opens to read CHANGED
+		cout << "test 2" << endl;
+	     inMessage = recfifo.recv(); // takes message in 
+		 cout << "test 1" << endl;
 	transform(inMessage.begin(), inMessage.end(), inMessage.begin(),(int (*)(int))tolower); // makes the word lower case
+	cout << "test 3" << endl;
+	StemEnglish(inMessage);// stems it 
+		cout << "inmessage: " << inMessage << endl;
+
+	vec = indexSearch(inMessage); // gets the cector of lines 
+	cout << "test 4" << endl;
+	is.open(filename.c_str()); // opens the text again 
+	cout << "test 5" << endl;
+	sendfifo.openwrite(); // CHANGED
 	
-	StemEnglish(inMessage);
-	cout << "meep: " << inMessage << endl;
-	vec = indexSearch(inMessage);
-	cout << "bleep: " << vec.size() << endl;
-	string aLine;
-	is.close();
-	//int firstIndex = 0, secondIndex = 0; // for finding place to insert the bold 
-	for (int i = 0; i < vec.size(); i++)
+cout << "test 6" << endl;
+	// for loop to send out the lines
+	
+	int total;
+	
+	if (vec.size() < 40)
 	{
-		is.open(filename.c_str());
-	
-		result.title = vec[i].title ; // puts out the title of the play 
-	//cout << "spleep" << endl;
-		cout << vec[i].title << endl;
-		cout << "line number: " << vec[i].lineNumber << endl;
-		is.seekg(vec[i].lineNumber, is.beg);
-		cout << "tellg: " << is.tellg() << endl;
-		getline(is, aLine);
-		cout << "The line: " << aLine << endl;
-		StemEnglish(inMessage);
-		//cout << "Choice: " << choice << endl;
-		cout << "so does betsy devos: " << inMessage << endl;
-		stringstream forBolding (aLine);  // puts line into stringstream for easy use 
-		// cout << "this is a line: " << forBolding << endl;	
-	string singleWord, wholeLine = ""; // initializes strings to be used in bolding process 
-		while( forBolding >> singleWord)
-		{
-			// selects the right word to bold 
-			if (singleWord.find(inMessage) != std::string::npos) 
-			{
-				singleWord = "\e[1m" + singleWord + "\e[0m ";
-				
-			}
-			else
-			{
-			singleWord = singleWord + " ";	
-			}
-			wholeLine = wholeLine + singleWord;
-			cout << "* kasich sucks: " + wholeLine << endl;
-		}
-		result.lineString = wholeLine; // prints line 
-		cout << "|wholeLine: " << wholeLine << endl;
-		
-	//	outMessage += result.title + ": " + result.lineString + " ";
-		cout << " message " << outMessage << endl;
-		outMessage += "\n";
-			sendfifo.openwrite();
-			cout << "spurk: " << wholeLine << endl;
-	sendfifo.send(wholeLine);
-	sendfifo.fifoclose();
-	is.close();
+		total = vec.size();
 	}
-		string closeMessage = "$END";
-		sendfifo.openwrite();
-	sendfifo.send(closeMessage);
-sendfifo.fifoclose();
+	else 
+	{
+		total = 40;
+	}
 	
-	
-//	sendfifo.openwrite();
-	// sendfifo.send(outMessage);
-	
+	for (int i = 0; i < total; i++)
+	{
+		is.seekg(vec[i].lineNumber, is.beg);
+		getline(is, aLine);
+	cout << "test 7 vec size: " << vec.size() << " i: " << i << endl;
+    cout << aLine << endl;
 
+	ostringstream oss;
+	oss << i;
+	aLine += oss.str();
+		sendfifo.send(aLine);
+		cout << "test 7.5" << endl;
+	}
+cout << "test 8" << endl;
+	
+	is.close();
+
+	sendfifo.send("$END");
+vec.clear();
+ sendfifo.fifoclose();
+	 recfifo.fifoclose();
+	
+	 cout << "all the way" << endl;
   }
-	 
-	recfifo.fifoclose();
-  
-is.close(); // closes file 
-
-//runLoop(is);
-
 
 
 }
@@ -231,7 +210,7 @@ void displayVector (vector <textLineNumbers> & vec, ifstream &is, string choice)
 		StemEnglish(choice);
 		//cout << "Choice: " << choice << endl;
 		
-		stringstream forBolding (aLine);  // puts line into stringstream for easy use 
+		stringstream forBolding(aLine);  // puts line into stringstream for easy use 
 		string singleWord, wholeLine = ""; // initializes strings to be used in bolding process 
 		while( forBolding >> singleWord)
 		{
